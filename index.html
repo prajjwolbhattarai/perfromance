@@ -37,24 +37,38 @@
   "imports": {
     "react/": "https://esm.sh/react@^19.1.0/",
     "react": "https://esm.sh/react@^19.1.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react-dom/client": "https://esm.sh/react-dom@^19.1.0/client",
     "recharts": "https://esm.sh/recharts@^3.1.0",
     "@google/genai": "https://esm.sh/@google/genai@^1.10.0"
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
   <body class="bg-light-bg dark:bg-dark-bg transition-colors duration-300">
     <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
+    <script type="module" src="./index.jsx"></script>
     <script>
       if ('serviceWorker' in navigator) {
         const swContent = `
-          const CACHE_NAME = 'perf-marketing-hub-cache-v2';
+          const CACHE_NAME = 'perf-marketing-hub-cache-v3';
           const APP_SHELL_URLS = [
-            '/',
-            './index.html'
+            './',
+            './index.html',
+            './index.jsx',
+            './App.jsx',
+            './types.js',
+            './data/mockData.js',
+            './services/geminiService.js',
+            './components/Header.jsx',
+            './components/DataUploader.jsx',
+            './components/Dashboard.jsx',
+            './components/ForecastingHub.jsx',
+            './components/AiInsights.jsx',
+            './components/KpiCard.jsx',
+            './components/PerformanceChart.jsx',
+            './components/CampaignsTable.jsx',
+            './components/ForecastingTable.jsx',
+            './components/icons.jsx'
           ];
 
           self.addEventListener('install', event => {
@@ -62,16 +76,13 @@
               caches.open(CACHE_NAME)
                 .then(cache => {
                   console.log('Service Worker: Caching app shell');
-                  return cache.addAll(APP_SHELL_URLS);
-                })
-                .catch(error => {
-                  console.error('Failed to cache app shell:', error);
+                  return cache.addAll(APP_SHELL_URLS).catch(err => console.error('SW Cache AddAll Error:', err));
                 })
             );
           });
 
           self.addEventListener('fetch', event => {
-            if (event.request.method !== 'GET') {
+            if (event.request.method !== 'GET' || event.request.url.startsWith('https://www.googleapis.com')) {
               return;
             }
 
@@ -83,7 +94,7 @@
                   }
 
                   return fetch(event.request).then(networkResponse => {
-                    if (!networkResponse || (networkResponse.status !== 200 && networkResponse.status !== 0)) {
+                    if (!networkResponse || (networkResponse.status !== 200 && networkResponse.status !== 0) || networkResponse.type === 'opaque') {
                       return networkResponse;
                     }
 
@@ -108,6 +119,7 @@
                       return Promise.all(
                           cacheNames.map(cacheName => {
                               if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                  console.log('SW: Deleting old cache', cacheName);
                                   return caches.delete(cacheName);
                               }
                           })
@@ -131,6 +143,5 @@
         }
       }
     </script>
-  <script type="module" src="/index.tsx"></script>
-</body>
+  </body>
 </html>
