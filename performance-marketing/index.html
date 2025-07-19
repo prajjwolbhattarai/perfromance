@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Performance Marketing Intelligence Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'dark-bg': '#1a202c',
+              'dark-card': '#2d3748',
+              'dark-border': '#4a5568',
+              'dark-text-primary': '#e2e8f0',
+              'dark-text-secondary': '#a0aec0',
+              'light-bg': '#f7fafc',
+              'light-card': '#ffffff',
+              'light-border': '#e2e8f0',
+              'light-text-primary': '#1a202c',
+              'light-text-secondary': '#718096',
+              'brand-primary': '#4299e1',
+              'brand-secondary': '#38b2ac',
+            },
+            animation: {
+                'spin-slow': 'spin 3s linear infinite',
+            }
+          },
+        },
+      }
+    </script>
+    <script src="https://apis.google.com/js/api.js"></script>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "recharts": "https://esm.sh/recharts@^3.1.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.10.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-light-bg dark:bg-dark-bg transition-colors duration-300">
+    <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        const swContent = `
+          const CACHE_NAME = 'perf-marketing-hub-cache-v2';
+          const APP_SHELL_URLS = [
+            '/',
+            './index.html'
+          ];
+
+          self.addEventListener('install', event => {
+            event.waitUntil(
+              caches.open(CACHE_NAME)
+                .then(cache => {
+                  console.log('Service Worker: Caching app shell');
+                  return cache.addAll(APP_SHELL_URLS);
+                })
+                .catch(error => {
+                  console.error('Failed to cache app shell:', error);
+                })
+            );
+          });
+
+          self.addEventListener('fetch', event => {
+            if (event.request.method !== 'GET') {
+              return;
+            }
+
+            event.respondWith(
+              caches.match(event.request)
+                .then(cachedResponse => {
+                  if (cachedResponse) {
+                    return cachedResponse;
+                  }
+
+                  return fetch(event.request).then(networkResponse => {
+                    if (!networkResponse || (networkResponse.status !== 200 && networkResponse.status !== 0)) {
+                      return networkResponse;
+                    }
+
+                    const responseToCache = networkResponse.clone();
+                    caches.open(CACHE_NAME)
+                      .then(cache => {
+                        cache.put(event.request, responseToCache);
+                      });
+
+                    return networkResponse;
+                  }).catch(error => {
+                    console.log('Fetch failed; returning offline fallback if available.', error);
+                  });
+                })
+            );
+          });
+          
+          self.addEventListener('activate', event => {
+              const cacheWhitelist = [CACHE_NAME];
+              event.waitUntil(
+                  caches.keys().then(cacheNames => {
+                      return Promise.all(
+                          cacheNames.map(cacheName => {
+                              if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                  return caches.delete(cacheName);
+                              }
+                          })
+                      );
+                  })
+              );
+          });
+        `;
+        try {
+            const blob = new Blob([swContent], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl)
+              .then(registration => {
+                console.log('Service Worker registered with scope:', registration.scope);
+              })
+              .catch(error => {
+                console.error('Service Worker registration failed:', error);
+              });
+        } catch (e) {
+            console.error('Failed to create or register service worker', e);
+        }
+      }
+    </script>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
